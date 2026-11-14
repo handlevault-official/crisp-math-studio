@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MathStudio — Calculator &amp; Retail Assistant</title>
+<meta name="description" content="Local-first math workshop, smart tape calculator, and retail profit solver for cashiers and professionals. Part of the Crisp Suite.">
+<meta name="theme-color" content="#090d16" id="metaThemeColor">
+<script src="https://cdn.tailwindcss.com"></script> 
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+/* Night Shift & Relaxing Ergonomic Theme (Default) */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #090d16;
+  --card: #101726;
+  --ink: #e2e8f0;
+  --mute: #8a99b5;
+  --accent: #38bdf8;
+  --accent-ink: #0f172a;
+  --warn: #fbbf24;
+  --bad: #f87171;
+  --line: #23314d;
+  --field: #0b111e;
+  --btn-bg: #19243b;
+  --btn-hover: #22314f;
+  --btn-line: #3f5580;
+}
+
+/* Day Shift / Light Mode */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f4f7fb;
+  --card: #ffffff;
+  --ink: #0f1a2e;
+  --mute: #53627d;
+  --accent: #0284c7;
+  --accent-ink: #ffffff;
+  --warn: #a16207;
+  --bad: #b91c1c;
+  --line: #cbd5e1;
+  --field: #f8fafd;
+  --btn-bg: #ffffff;
+  --btn-hover: #f1f5f9;
+  --btn-line: #94a3b8;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.5 'Plus Jakarta Sans', system-ui, sans-serif;
+  padding: 16px 12px 32px;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+button, input, select { font: inherit; color: inherit; }
+
+/* Tactile & Visible Buttons */
+button {
+  cursor: pointer;
+  border: 1.5px solid var(--btn-line);
+  background: var(--btn-bg);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 10px 14px;
+  min-height: 44px;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  transition: all 0.15s ease;
+}
+button:hover:not(:disabled) {
+  background: var(--btn-hover);
+  border-color: var(--accent);
+}
+button:active:not(:disabled) { transform: translateY(1px); }
+button.primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: transparent;
+  font-weight: 700;
+  box-shadow: none;
+}
+button.primary:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+button.danger {
+  background: rgba(248, 113, 113, 0.12);
+  color: var(--bad);
+  border-color: rgba(248, 113, 113, 0.5);
+}
+button:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+
+input, select {
+  width: 100%;
+  background: var(--field);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--ink);
+  outline: none;
+}
+input:focus, select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+}
+
+label { display: block; font-size: 13px; color: var(--mute); margin-bottom: 4px; font-weight: 600; }
+
+header.top {
+  max-width: 900px;
+  margin: 0 auto 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+.brand { font-weight: 800; color: var(--accent); font-size: 1.2rem; letter-spacing: -0.02em; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tabs button { padding: 8px 14px; min-height: 38px; font-size: 14px; }
+.tabs button.on { background: var(--accent); color: var(--accent-ink); border-color: transparent; font-weight: 700; }
+
+main { max-width: 900px; margin: 0 auto; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.hint { color: var(--mute); font-size: 13px; margin: 4px 0; }
+
+/* Calculator UI Layout */
+.calc-layout { display: grid; grid-template-columns: 1fr 320px; gap: 16px; align-items: start; }
+.calc-screen {
+  background: var(--field);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: right;
+  margin-bottom: 16px;
+}
+.calc-screen .expression { font-size: 14px; color: var(--mute); min-height: 20px; word-break: break-all; }
+.calc-screen .result { font-size: 32px; font-weight: 700; color: var(--ink); word-break: break-all; }
+.keypad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.keypad button { font-size: 18px; font-weight: 600; padding: 14px 0; }
+.keypad button.op { color: var(--accent); font-weight: 700; }
+
+/* Tape Receipt History */
+.tape-box {
+  background: var(--field);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  height: 380px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+.tape-item { padding: 6px 8px; border-bottom: 1px dashed var(--line); display: flex; justify-content: space-between; color: var(--mute); }
+.tape-item span.ans { color: var(--ink); font-weight: 700; }
+
+@media(max-width: 768px) {
+  .calc-layout { grid-template-columns: 1fr; }
+  .grid2 { grid-template-columns: 1fr; }
+  header.top { flex-direction: column; align-items: stretch; }
+  .tabs { justify-content: stretch; }
+  .tabs button { flex: 1; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div>
+    <span class="brand">🧮 MathStudio</span>
+    <p class="hint" style="margin:0;">Crisp Suite / HandleVault Utility</p>
+  </div>
+  <nav class="tabs" aria-label="Sections">
+    <button data-tab="calc" class="on">Calculator &amp; Tape</button>
+    <button data-tab="business">Retail Solvers</button>
+    <button data-tab="settings">Settings</button>
+  </nav>
+  <div class="row">
+    <button id="btnThemeToggle" type="button" aria-label="Switch shift theme" style="padding:8px 12px;min-height:38px;font-size:13px;">🌙 Night Shift</button>
+  </div>
+</header>
+
+<main>
+  <!-- TAB 1: CALCULATOR & TAPE -->
+  <section id="tab-calc">
+    <div class="card calc-layout">
+      <div>
+        <div class="calc-screen">
+          <div id="calcExpr" class="expression">0</div>
+          <div id="calcResult" class="result">0</div>
+        </div>
+        <div class="keypad">
+          <button class="danger" data-action="clear">C</button>
+          <button data-action="back">⌫</button>
+          <button data-action="(">(</button>
+          <button class="op" data-action="/">÷</button>
+
+          <button data-num="7">7</button>
+          <button data-num="8">8</button>
+          <button data-num="9">9</button>
+          <button class="op" data-action="*">×</button>
+
+          <button data-num="4">4</button>
+          <button data-num="5">5</button>
+          <button data-num="6">6</button>
+          <button class="op" data-action="-">−</button>
+
+          <button data-num="1">1</button>
+          <button data-num="2">2</button>
+          <button data-num="3">3</button>
+          <button class="op" data-action="+">+</button>
+
+          <button data-num="0" style="grid-column: span 2;">0</button>
+          <button data-num=".">.</button>
+          <button class="primary" data-action="equals">=</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="row" style="justify-content: space-between; margin-bottom: 8px;">
+          <label style="margin:0;">Receipt Tape History</label>
+          <button id="clearTape" style="padding:4px 8px; min-height:30px; font-size:12px;">Clear Tape</button>
+        </div>
+        <div id="tapeLog" class="tape-box">
+          <div class="hint" style="text-align:center; margin:auto;">No calculations yet.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 2: RETAIL & BUSINESS SOLVERS -->
+  <section id="tab-business" hidden>
+    <div class="card grid2">
+      <div>
+        <h2 style="margin-top:0; font-size:16px; color:var(--accent);">Markup &amp; Margin Calculator</h2>
+        <div style="margin-bottom: 12px;">
+          <label for="costPrice">Cost Price (₱)</label>
+          <input id="costPrice" type="number" step="any" placeholder="0.00" value="100">
+        </div>
+        <div style="margin-bottom: 12px;">
+          <label for="sellPrice">Selling Price (₱)</label>
+          <input id="sellPrice" type="number" step="any" placeholder="0.00" value="150">
+        </div>
+        <div style="background:var(--field); padding:12px; border-radius:10px; border:1px solid var(--line);">
+          <div class="row" style="justify-content: space-between;"><span class="hint">Gross Profit:</span> <strong id="resProfit">₱50.00</strong></div>
+          <div class="row" style="justify-content: space-between;"><span class="hint">Markup Rate:</span> <strong id="resMarkup">50.00%</strong></div>
+          <div class="row" style="justify-content: space-between;"><span class="hint">Profit Margin:</span> <strong id="resMargin">33.33%</strong></div>
+        </div>
+      </div>
+
+      <div>
+        <h2 style="margin-top:0; font-size:16px; color:var(--accent);">Discount &amp; Sale Solver</h2>
+        <div style="margin-bottom: 12px;">
+          <label for="origPrice">Original Price (₱)</label>
+          <input id="origPrice" type="number" step="any" placeholder="0.00" value="500">
+        </div>
+        <div style="margin-bottom: 12px;">
+          <label for="discPercent">Discount Percentage (%)</label>
+          <input id="discPercent" type="number" step="any" placeholder="0" value="20">
+        </div>
+        <div style="background:var(--field); padding:12px; border-radius:10px; border:1px solid var(--line);">
+          <div class="row" style="justify-content: space-between;"><span class="hint">You Save:</span> <strong id="resSave" style="color:var(--bad);">₱100.00</strong></div>
+          <div class="row" style="justify-content: space-between; margin-top:8px;"><span class="hint">Final Price:</span> <strong id="resFinal" style="font-size:18px; color:var(--accent);">₱400.00</strong></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 3: SETTINGS -->
+  <section id="tab-settings" hidden>
+    <div class="card">
+      <h2 style="margin-top:0;">About MathStudio</h2>
+      <p class="hint">MathStudio is built for cashiers, retail workers, and students who need instant business calculations and offline utility support without login walls.</p>
+      <p class="hint">All calculation tape history is stored securely and privately in your browser local storage.</p>
+      <button class="danger" id="resetData" style="margin-top: 12px;">Clear All Stored History</button>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  // Theme Toggle Controller
+  const THEME_KEY = 'mathstudio_theme';
+  const btnTheme = document.getElementById('btnThemeToggle');
+  const metaTheme = document.getElementById('metaThemeColor');
+
+  function applyTheme(theme) {
+    const isLight = theme === 'light';
+    document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
+    if (btnTheme) btnTheme.textContent = isLight ? '☀️ Day Shift' : '🌙 Night Shift';
+    if (metaTheme) metaTheme.setAttribute('content', isLight ? '#f4f7fb' : '#090d16');
+    localStorage.setItem(THEME_KEY, isLight ? 'light' : 'dark');
+  }
+
+  applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
+  btnTheme.addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'light' ? 'dark' : 'light');
+  });
+
+  // Tab Navigation Switcher
+  const tabs = document.querySelectorAll('.tabs button');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('on'));
+      tab.classList.add('on');
+      const target = tab.dataset.tab;
+      document.querySelectorAll('main > section').forEach(sec => {
+        sec.hidden = sec.id !== `tab-${target}`;
+      });
+    });
+  });
+
+  // Calculator Logic & Tape History
+  let currentExpr = '';
+  const exprEl = document.getElementById('calcExpr');
+  const resultEl = document.getElementById('calcResult');
+  const tapeLog = document.getElementById('tapeLog');
+  const TAPE_KEY = 'mathstudio_tape_history';
+
+  function loadTape() {
+    try {
+      const history = JSON.parse(localStorage.getItem(TAPE_KEY) || '[]');
+      if (history.length === 0) {
+        tapeLog.innerHTML = '<div class="hint" style="text-align:center; margin:auto;">No calculations yet.</div>';
+        return;
+      }
+      tapeLog.replaceChildren();
+      history.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'tape-item';
+        div.innerHTML = `<span>${item.q}</span> <span class="ans">= ${item.a}</span>`;
+        tapeLog.append(div);
+      });
+      tapeLog.scrollTop = tapeLog.scrollHeight;
+    } catch {
+      tapeLog.innerHTML = '<div class="hint" style="text-align:center; margin:auto;">No calculations yet.</div>';
+    }
+  }
+
+  function appendTape(q, a) {
+    try {
+      const history = JSON.parse(localStorage.getItem(TAPE_KEY) || '[]');
+      history.push({ q, a });
+      if (history.length > 50) history.shift();
+      localStorage.setItem(TAPE_KEY, JSON.stringify(history));
+      loadTape();
+    } catch {}
+  }
+
+  document.querySelectorAll('.keypad button').forEach(button => {
+    button.addEventListener('click', () => {
+      const num = button.dataset.num;
+      const action = button.dataset.action;
+
+      if (num !== undefined) {
+        currentExpr += num;
+        exprEl.textContent = currentExpr;
+      } else if (action) {
+        if (action === 'clear') {
+          currentExpr = '';
+          exprEl.textContent = '0';
+          resultEl.textContent = '0';
+        } else if (action === 'back') {
+          currentExpr = currentExpr.slice(0, -1);
+          exprEl.textContent = currentExpr || '0';
+        } else if (action === '(' || action === ')') {
+          currentExpr += action;
+          exprEl.textContent = currentExpr;
+        } else if (['+', '-', '*', '/'].includes(action)) {
+          currentExpr += ` ${action} `;
+          exprEl.textContent = currentExpr;
+        } else if (action === 'equals') {
+          try {
+            // Safe evaluation for basic arithmetic
+            const sanitized = currentExpr.replace(/×/g, '*').replace(/÷/g, '/');
+            const res = Function(`'use strict'; return (${sanitized})`)();
+            if (isFinite(res)) {
+              resultEl.textContent = res;
+              appendTape(currentExpr, res);
+              currentExpr = String(res);
+            } else {
+              resultEl.textContent = 'Error';
+            }
+          } catch {
+            resultEl.textContent = 'Invalid';
+          }
+        }
+      }
+    });
+  });
+
+  document.getElementById('clearTape').addEventListener('click', () => {
+    localStorage.removeItem(TAPE_KEY);
+    loadTape();
+  });
+
+  // Business Solvers Logic
+  const costInput = document.getElementById('costPrice');
+  const sellInput = document.getElementById('sellPrice');
+  const resProfit = document.getElementById('resProfit');
+  const resMarkup = document.getElementById('resMarkup');
+  const resMargin = document.getElementById('resMargin');
+
+  function calculateRetail() {
+    const cost = parseFloat(costInput.value) || 0;
+    const sell = parseFloat(sellInput.value) || 0;
+    const profit = sell - cost;
+    const markup = cost > 0 ? (profit / cost) * 100 : 0;
+    const margin = sell > 0 ? (profit / sell) * 100 : 0;
+
+    resProfit.textContent = `₱${profit.toFixed(2)}`;
+    resMarkup.textContent = `${markup.toFixed(2)}%`;
+    resMargin.textContent = `${margin.toFixed(2)}%`;
+  }
+
+  costInput.addEventListener('input', calculateRetail);
+  sellInput.addEventListener('input', calculateRetail);
+
+  const origInput = document.getElementById('origPrice');
+  const discInput = document.getElementById('discPercent');
+  const resSave = document.getElementById('resSave');
+  const resFinal = document.getElementById('resFinal');
+
+  function calculateDiscount() {
+    const orig = parseFloat(origInput.value) || 0;
+    const disc = parseFloat(discInput.value) || 0;
+    const save = orig * (disc / 100);
+    const final = Math.max(0, orig - save);
+
+    resSave.textContent = `₱${save.toFixed(2)}`;
+    resFinal.textContent = `₱${final.toFixed(2)}`;
+  }
+
+  origInput.addEventListener('input', calculateDiscount);
+  discInput.addEventListener('input', calculateDiscount);
+
+  document.getElementById('resetData').addEventListener('click', () => {
+    if (confirm('Clear all calculation tape history?')) {
+      localStorage.removeItem(TAPE_KEY);
+      loadTape();
+      alert('History cleared.');
+    }
+  });
+
+  // Init
+  loadTape();
+  calculateRetail();
+  calculateDiscount();
+})();
+</script>
+
+</body>
+</html>
